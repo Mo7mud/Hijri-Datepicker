@@ -1,7 +1,7 @@
 /*********************************************
  * Hijri/Gregorian Date Picker
  *
- * Design by ZulNs @Yogyakarta, January 2016
+ * Original design by ZulNs @Yogyakarta, January 2016
  *********************************************
  *
  * Revised on 30 December 2018:
@@ -9,10 +9,14 @@
  *
  * Revised on 8 January 2018:
  *   UI has been changed to adapt with W3CSS
+ * 
+ * Forked by Mohammad Ahmed @Mohammad699 2025
+ *  Added date format support
  */
 'use strict';
 function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	if(typeof HijriDate=='undefined')throw new Error('HijriDate() class required!');
+
 	const MIN_WIDTH=280,MAX_WIDTH=600;
 	let	dp=typeof this=='object'?this:window,gdate=new Date(),hdate=new HijriDate(),pgdate=new Date(),phdate=new HijriDate(),dispDate,pickDate,
 	tzOffset=Date.parse('01 Jan 1970'),oldTheme,gridAni='zoom',isRTL=false,
@@ -265,6 +269,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	if(typeof lang=='string'){lang=lang.toLowerCase();if(typeof Datepicker.language[lang]!='object')lang='en'}
 	else lang='en';
 	Datepicker.lang=lang;
+
 	dp.setTheme(theme);
 	width=HijriDate.int(width,300);
 	year=HijriDate.int(year,NaN);
@@ -277,6 +282,88 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	}
 	createStyle();createAboutModal();createPicker()
 }
+
+(function() {
+    const allowedTokens = ['d', 'dd', 'm', 'mm', 'yy', 'yyyy'];
+    const allowedSeparators = ['/', '-', '.', ' ', ','];
+
+    // Set default format as a static property
+    Datepicker.dateFormat = 'dd-mm-yyyy';
+
+    function isValidFormat(fmt) {
+        if (typeof fmt !== 'string') return false;
+        let parts = fmt.split(/([\/\-\.\s,])/);
+        if (parts.length < 3 || parts.length > 5 || parts.length % 2 === 0) return false;
+        for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+                if (!allowedTokens.includes(parts[i].toLowerCase())) return false;
+            } else {
+                if (!allowedSeparators.includes(parts[i])) return false;
+            }
+        }
+        return true;
+    }
+
+    Datepicker.setDateFormat = function(fmt) {
+        if (isValidFormat(fmt)) {
+            Datepicker.dateFormat = fmt;
+            return true;
+        }
+        return false;
+    };
+
+    function pad(n) {
+        return n < 10 ? '0' + n : n;
+    }
+
+    function formatDate(dateObj, format) {
+        let d = dateObj.getDate();
+        let m = dateObj.getMonth() + 1;
+        let y = dateObj.getFullYear();
+
+        let formatted = format
+            .replace(/dd/g, pad(d))
+            .replace(/d/g, d)
+            .replace(/mm/g, pad(m))
+            .replace(/m/g, m)
+            .replace(/yyyy/g, y)
+            .replace(/yy/g, ('' + y).slice(-2));
+        return formatted;
+    }
+
+    Date.prototype.getFormatedDate = function(fmt) {
+        // Use instance format if set, otherwise static/global
+        let useFmt = fmt && isValidFormat(fmt)
+            ? fmt
+            : (this._dateFormat && isValidFormat(this._dateFormat)
+                ? this._dateFormat
+                : Datepicker.dateFormat);
+        return formatDate(this, useFmt);
+    };
+    if (typeof HijriDate !== 'undefined') {
+        HijriDate.prototype.getFormatedDate = function(fmt) {
+            let useFmt = fmt && isValidFormat(fmt)
+                ? fmt
+                : (this._dateFormat && isValidFormat(this._dateFormat)
+                    ? this._dateFormat
+                    : Datepicker.dateFormat);
+            return formatDate(this, useFmt);
+        };
+    }
+
+    // Add instance setter for format
+    Datepicker.prototype.setDateFormat = function(fmt) {
+        if (isValidFormat(fmt)) {
+            // Store on the pickDate and dispDate objects for this instance
+            if (this.getPickedDate) this.getPickedDate()._dateFormat = fmt;
+            if (this.getOppositePickedDate) this.getOppositePickedDate()._dateFormat = fmt;
+            this._dateFormat = fmt;
+            return true;
+        }
+        return false;
+    };
+})();
+
 Date.prototype.getDateString=function(){
 	return Datepicker.getDigit(this.getWeekdayName()+', '+this.getDate()+' '+this.getMonthName()+' '+this.getYearString())
 };
