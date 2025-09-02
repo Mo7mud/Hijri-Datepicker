@@ -3,14 +3,14 @@
 [![DOI: 10.5281/zenodo.2600133](https://zenodo.org/badge/doi/10.5281/zenodo.2600133.svg)](https://zenodo.org/record/2600133)
 
 ## Demo
-Demo [here](https://zulns.github.io/Datepicker.js/).
+Demo [here](https://mo7mud.github.io/Hijri-Datepicker/).
 
 ## Dependencies
-- [HijriDate.js](https://github.com/ZulNs/HijriDate.js) which allows the use of
-[`HijriDate`](https://zulns.github.io/HijriDate.js/hijri-date-api-doc.html) objects, JS library to calculates Hijri dates in the same way as built-in
+- HijriDate.js which allows the use of
+[`HijriDate`](https://mo7mud.github.io/Hijri-Datepicker/HijriDate.js/) objects, JS library to calculates Hijri dates in the same way as built-in
 `Date` object calculates Gregorian dates.
 
-- [w3css](https://github.com/ZulNs/w3css), originally forked from [CSS Framework](https://github.com/JaniRefsnes/w3css) by
+- w3css, originally forked from [CSS Framework](https://github.com/JaniRefsnes/w3css) by
 [Jan Egil Refsnes](https://github.com/JaniRefsnes) for styling this widget. 
 
 ## Usage
@@ -34,9 +34,9 @@ Simply put this code snippet to anywhere you want in the body of your html file:
 ### Online
 ```html
 <div id="datepicker"></div>
-<link rel="stylesheet" href="https://zulns.github.io/w3css/w3.css" />
-<script type="text/javascript" src="https://zulns.github.io/HijriDate.js/hijri-date.js"></script>
-<script type="text/javascript" src="https://zulns.github.io/Datepicker.js/datepicker.js"></script>
+<link rel="stylesheet" href="w3css/w3.css" />
+<script type="text/javascript" src="HijriDate.js/hijri-date.js"></script>
+<script type="text/javascript" src="datepicker.js"></script>
 <script type="text/javascript">
     let datepicker = new Datepicker();
     document.getElementById('datepicker').appendChild(datepicker.getElement());
@@ -97,6 +97,7 @@ Datepicker.language["en"] = {
     ];
 };
 ```
+You are very welcomed to contribute your language to add to the library
 
 ## API Documentation
 API doc [here](datepicker-api-doc.md).
@@ -110,4 +111,7 @@ API doc [here](datepicker-api-doc.md).
 ---
 #### Designed By ZulNs
 ##### @Gorontalo, 8 January 2019
+
+### Development continued in 2025 By Mohammad Ahmad
+#### @Mo7mud, 3 September 2025
 ---
