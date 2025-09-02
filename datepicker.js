@@ -11,13 +11,17 @@
  *   UI has been changed to adapt with W3CSS
  * 
  * Forked by Mohammad Ahmed @Mohammad699 2025
- *  Added date format support
+ * Added date format support
+ * Added century/decade/year/month picker
  */
 'use strict';
 function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	if(typeof HijriDate=='undefined')throw new Error('HijriDate() class required!');
 
-	const MIN_WIDTH=280,MAX_WIDTH=600;
+	// Picker mode: 'day', 'month', 'year', 'decade', 'century'
+    let pickerMode = 'day';
+
+	const MIN_WIDTH=320,MAX_WIDTH=600;
 	let	dp=typeof this=='object'?this:window,gdate=new Date(),hdate=new HijriDate(),pgdate=new Date(),phdate=new HijriDate(),dispDate,pickDate,
 	tzOffset=Date.parse('01 Jan 1970'),oldTheme,gridAni='zoom',isRTL=false,
 	aboutElm,aboutTitleElm,aboutDateElm,aboutCloseBtnElm,
@@ -30,7 +34,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	dpickElm=createElm('div','zulns-datepicker w3-card-4 w3-hide'),
 	headerElm=createElm('div','w3-display-container w3-theme'),
 	yearValElm=createElm('div','w3-display-middle w3-xlarge'),
-	monthValElm=createElm('div','w3-display-bottommiddle w3-large'),
+	monthValElm=createElm('div','w3-display-bottommiddle w3-center w3-large'),
 	gridsElm=createElm('div','w3-white'),
 	wdayTitleElm=createElm('div','w3-cell-row w3-center w3-small w3-light-grey'),
 	createStyle=function(){
@@ -76,7 +80,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 			nextMonthBtnElm=createElm('button','w3-button w3-ripple w3-display-bottomright','<svg width="18" height="19"><path d="M7 7L10 13L7 19L9 19L12 13L9 7Z"/></svg>');
 		dpickElm.style.minWidth=MIN_WIDTH+'px';dpickElm.style.maxWidth=MAX_WIDTH+'px';dpickElm.style.width=width+'px';
 		headerElm.style.cssText='height:104px;';
-		yearValElm.style.cssText='cursor:default;';monthValElm.style.cssText='margin-bottom:3px;cursor:default;';
+		yearValElm.style.cssText='cursor:default;';monthValElm.style.cssText='margin-bottom:3px;cursor:default;width:100%;';
 		wdayTitleElm.style.cssText='padding:2px 4px;margin-bottom:4px;cursor:default;';
 		headerElm.appendChild(yearValElm);headerElm.appendChild(monthValElm);headerElm.appendChild(closeBtnElm);
 		headerElm.appendChild(prevYearBtnElm);headerElm.appendChild(nextYearBtnElm);headerElm.appendChild(prevMonthBtnElm);
@@ -84,7 +88,8 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		dpickElm.appendChild(gridsElm);
 		addEvt(closeBtnElm,'click',onHideMe);addEvt(prevYearBtnElm,'click',onDecYear);
 		addEvt(nextYearBtnElm,'click',onIncYear);addEvt(prevMonthBtnElm,'click',onDecMonth);
-		addEvt(nextMonthBtnElm,'click',onIncMonth);updHeader();createWdayTitle()
+		addEvt(nextMonthBtnElm,'click',onIncMonth);updHeader();createWdayTitle();
+		addEvt(monthValElm,'click',onShowMonth)
 	},
 	updHeader=function(){
 		yearValElm.innerHTML=Datepicker.getDigit(dispDate.getYearString());
@@ -146,6 +151,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	onIncYear=function(){gridAni='left';return isRTL?decYear():incYear()},
 	onDecMonth=function(){gridAni='right';return isRTL?incMonth():decMonth()},
 	onIncMonth=function(){gridAni='left';return isRTL?decMonth():incMonth()},
+	onShowMonth=function(){if(pickerMode!='day'){pickerMode='day';updPicker()}else{pickerMode='month';deleteDates();createMonthPicker(dispDate.getFullYear())}},
 	onPick=function(ev){
 		ev=ev||window.event;
 		let el=ev.target||ev.srcElement;
@@ -280,6 +286,193 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		if(!isNaN(year))dispDate.setFullYear(year);
 		if(!isNaN(month))dispDate.setMonth(month)
 	}
+
+	// --- Helper for range generation ---
+    function range(start, end) {
+        let arr = [];
+        for (let i = start; i <= end; i++) arr.push(i);
+        return arr;
+    }
+
+	//=======================
+    // --- UI for year/decade/century/month selection ---
+    function showPicker(mode, value) {
+        pickerMode = mode;
+        deleteDates();
+        if (mode === 'year') {
+            createYearPicker(value);
+        } else if (mode === 'decade') {
+            createDecadePicker(value);
+        } else if (mode === 'century') {
+            createCenturyPicker(value);
+        } else if (mode === 'month') {
+            createMonthPicker(value);
+        } else {
+            createDates();
+        }
+    }
+
+    function createYearPicker(decadeStart) {
+        let year = decadeStart || Math.floor(dispDate.getFullYear() / 10) * 10;
+        let years = range(year, year + 9);
+        let row = createElm('div','w3-cell-row');
+        years.forEach((y, i) => {
+            let btn = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getDigit(y));
+			btn.style.minWidth = '20%';
+            btn.onclick = function() {
+                dispDate.setFullYear(y);
+                showPicker('month', y);
+            };
+            row.appendChild(btn);
+            if ((i+1) % 5 === 0 && i !== years.length-1) {
+                gridsElm.appendChild(row);
+                row = createElm('div','w3-cell-row');
+            }
+        });
+        gridsElm.appendChild(row);
+        // Decade navigation
+        let navRow = createElm('div','w3-cell-row');
+        let prev = createElm('button','w3-cell w3-btn','«');
+        let up = createElm('button','w3-cell w3-btn','⬆');
+        let next = createElm('button','w3-cell w3-btn','»');
+        prev.onclick = () => showPicker('year', year-10);
+        up.onclick = () => showPicker('decade', Math.floor(year/100)*100);
+        next.onclick = () => showPicker('year', year+10);
+        navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next);
+        gridsElm.appendChild(navRow);
+        yearValElm.innerHTML = Datepicker.getDigit(year + ' - ' + (year+9));
+        monthValElm.innerHTML = '';
+    }
+	
+    function createDecadePicker(centuryStart) {
+        let century = centuryStart || Math.floor(dispDate.getFullYear() / 100) * 100;
+        let decades = range(century, century + 90).filter((y,i) => i%10===0);
+        let row = createElm('div','w3-cell-row');
+        decades.forEach((d, i) => {
+            let btn = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getDigit(d + '-' + (d+9)));
+			btn.style.minWidth = '50%';
+            btn.onclick = function() {
+                showPicker('year', d);
+            };
+            row.appendChild(btn);
+            if ((i+1) % 2 === 0 && i !== decades.length-1) {
+                gridsElm.appendChild(row);
+                row = createElm('div','w3-cell-row');
+            }
+        });
+        gridsElm.appendChild(row);
+        // Century navigation
+        let navRow = createElm('div','w3-cell-row');
+        let prev = createElm('button','w3-cell w3-btn','«');
+        let up = createElm('button','w3-cell w3-btn','⬆');
+        let next = createElm('button','w3-cell w3-btn','»');
+        prev.onclick = () => showPicker('decade', century-100);
+        up.onclick = () => showPicker('century', Math.floor(century/1000)*1000);
+        next.onclick = () => showPicker('decade', century+100);
+        navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next);
+        gridsElm.appendChild(navRow);
+        yearValElm.innerHTML = Datepicker.getDigit(century + ' - ' + (century+99));
+        monthValElm.innerHTML = '';
+    }
+
+    function createCenturyPicker(millenniumStart) {
+        let mill = millenniumStart || Math.floor(dispDate.getFullYear() / 1000) * 1000;
+        let centuries = range(mill, mill + 900).filter((y,i) => i%100===0);
+        let row = createElm('div','w3-cell-row');
+        centuries.forEach((c, i) => {
+            let btn = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getDigit(c + '-' + (c+99)));
+			btn.style.minWidth = '50%';
+            btn.onclick = function() {
+                showPicker('decade', c);
+            };
+            row.appendChild(btn);
+            if ((i+1) % 2 === 0 && i !== centuries.length-1) {
+                gridsElm.appendChild(row);
+                row = createElm('div','w3-cell-row');
+            }
+        });
+        gridsElm.appendChild(row);
+        // Millennium navigation
+        let navRow = createElm('div','w3-cell-row');
+        let prev = createElm('button','w3-cell w3-btn','«');
+        let next = createElm('button','w3-cell w3-btn','»');
+        prev.onclick = () => showPicker('century', mill-1000);
+        next.onclick = () => showPicker('century', mill+1000);
+        navRow.appendChild(prev); navRow.appendChild(next);
+        gridsElm.appendChild(navRow);
+        yearValElm.innerHTML = Datepicker.getDigit(mill + ' - ' + (mill+999));
+        monthValElm.innerHTML = '';
+    }
+
+    function createMonthPicker(year) {
+		let months = isHijr
+			? (Datepicker.lang === 'en' ? HijriDate.monthNames : Datepicker.getVal('hMonthNames'))
+			: Datepicker.getVal('monthNames');        
+        let row = createElm('div','w3-cell-row');
+        months.forEach((m, i) => {
+            let btn = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', m);
+			btn.style.minWidth = '50%';
+            btn.onclick = function() {
+                dispDate.setFullYear(year);
+                dispDate.setMonth(i);
+                dispDate.setDate(1);
+                pickerMode = 'day';
+                updPicker();
+            };
+            row.appendChild(btn);
+            if ((i+1) % 2 === 0 && i !== months.length-1) {
+                gridsElm.appendChild(row);
+                row = createElm('div','w3-cell-row');
+            }
+        });
+        gridsElm.appendChild(row);
+        // Back to year picker
+        let navRow = createElm('div','w3-cell-row');
+        let up = createElm('button','w3-cell w3-btn','⬆');
+        up.onclick = () => showPicker('year', Math.floor(year/10)*10);
+        navRow.appendChild(up);
+        gridsElm.appendChild(navRow);
+        yearValElm.innerHTML = Datepicker.getDigit(year);
+        monthValElm.innerHTML = '';
+    }
+
+    // --- Click handlers for header ---
+    yearValElm.style.cursor = 'pointer';
+    addEvt(yearValElm, 'click', function() {
+        if (pickerMode === 'day' || pickerMode === 'month') {
+            showPicker('year');
+        } else if (pickerMode === 'year') {
+            let y = Math.floor(dispDate.getFullYear() / 10) * 10;
+            showPicker('decade', Math.floor(y/100)*100);
+        } else if (pickerMode === 'decade') {
+            let y = Math.floor(dispDate.getFullYear() / 100) * 100;
+            showPicker('century', Math.floor(y/1000)*1000);
+        }
+    });
+
+    // --- Override updPicker to handle pickerMode ---
+    let origUpdPicker = updPicker;
+    updPicker = function() {
+        if (pickerMode === 'day') {
+            origUpdPicker();
+        } else if (pickerMode === 'year') {
+            showPicker('year', Math.floor(dispDate.getFullYear()/10)*10);
+        } else if (pickerMode === 'decade') {
+            showPicker('decade', Math.floor(dispDate.getFullYear()/100)*100);
+        } else if (pickerMode === 'century') {
+            showPicker('century', Math.floor(dispDate.getFullYear()/1000)*1000);
+        } else if (pickerMode === 'month') {
+            showPicker('month', dispDate.getFullYear());
+        }
+    };
+
+    // --- When showing picker, always reset to day mode ---
+    let origShow = dp.show;
+    dp.show = function() {
+        pickerMode = 'day';
+        return origShow();
+    };
+
 	createStyle();createAboutModal();createPicker()
 }
 
@@ -441,7 +634,7 @@ Datepicker.language['ar']={
 	digit:["٠","١","٢","٣","٤", "٥","٦","٧","٨","٩"],
 	eraSuffix:["ميلادي","قبل الميلاد"],
 	hEraSuffix:["هجرة","قبل الهجرة"],
-	monthNames:["يَنايِر","فِبرايِر","مارِس","أبريل","مايو","يونيو","يوليو","أغُسطُس","سِبْتَمْبِر","أکْتببِر","نوفَمْبِر","ديسَمْبِر"],
+	monthNames:["يَنايِر","فِبرايِر","مارِس","أبريل","مايو","يونيو","يوليو","أغُسطُس","سِبْتَمْبِر","أکْتوبَر","نوفَمْبِر","ديسَمْبِر"],
 	weekdayNames:["الأحَد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],
 	hMonthNames:["المُحَرَّم","صَفَر ","رَبيع الاوَّل","رَبيع الآخِر","جُمادى الأولى","جُمادى الآخِرة","رَجَب","شَعبان","رَمَضان","شَوّال","ذو القَعدة","ذو الحِجّة"]
 };
