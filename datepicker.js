@@ -20,6 +20,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 
 	// Picker mode: 'day', 'month', 'year', 'decade', 'century'
     let pickerMode = 'day';
+	let dateToHighlight = 0;
 
 	const MIN_WIDTH=320,MAX_WIDTH=600;
 	let	dp=typeof this=='object'?this:window,gdate=new Date(),hdate=new HijriDate(),pgdate=new Date(),phdate=new HijriDate(),dispDate,pickDate,
@@ -118,7 +119,8 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 				ttc=dispDate.getTime()+(pdate-1)*864e5;
 			grid.setAttribute('val',pdate);
 			row.appendChild(grid);ttc=dispDate.getTime()+(pdate-1)*864e5;
-			if(getCurTime()==ttc||ttc==26586e6)grid.className+=' w3-'+theme;
+			console.log(dateToHighlight,ttc,getCurTime());
+			if(getCurTime()==ttc||ttc==26586e6||ttc==dateToHighlight)grid.className+=' w3-'+theme;
 			else{
 				if(i%7==isFri)grid.className+=' w3-text-teal';
 				else if(i%7==isSun)grid.className+=' w3-text-red'
@@ -155,7 +157,11 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 	onPick=function(ev){
 		ev=ev||window.event;
 		let el=ev.target||ev.srcElement;
-		pickDate.setTime(dispDate.getTime());pickDate.setDate(el.getAttribute('val'));getOppsPDate().setTime(pickDate.getTime());hideMe();
+		pickDate.setTime(dispDate.getTime());
+		pickDate.setDate(el.getAttribute('val'));
+		dateToHighlight = pickDate.getTime();
+		getOppsPDate().setTime(pickDate.getTime());
+		hideMe();
 		if(pickDate.getTime()==26586e6){
 			aboutTitleElm.innerHTML='Hijri/Gregorian&nbsp;Datepicker';
 			aboutDateElm.innerHTML='Gorontalo,&nbsp;25&nbsp;January&nbsp;2019';
@@ -249,6 +255,43 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		dispDate.setDate(1);
 		if(dispDate.getTime()!=o){gridAni='zoom';updPicker();return true}
 		return false
+	};
+	/**
+	 * Set the picker to a specific date.
+	 * @param {Date|HijriDate|string|number} date - JS Date, HijriDate, timestamp, or date string.
+	 * @returns {boolean} true if set, false if invalid.
+	 */
+	dp.setInitialDate = function(date) {
+		let newDate = null;
+		// If Hijri mode, try to use HijriDate
+		if (isHijr && typeof HijriDate !== 'undefined') {
+			if (date instanceof HijriDate) {
+				newDate = new HijriDate(date.getTime());
+			} else if (date instanceof Date) {
+				newDate = new HijriDate(date.getTime());
+			} else if (typeof date === 'string' || typeof date === 'number') {
+				let parsed = new HijriDate(date);
+				if (!isNaN(parsed.getTime())) newDate = parsed;
+			}
+		} else {
+			if (date instanceof Date) {
+				newDate = new Date(date.getTime());
+			} else if (date instanceof HijriDate) {
+				newDate = new Date(date.getTime());
+			} else if (typeof date === 'string' || typeof date === 'number') {
+				let parsed = new Date(date);
+				if (!isNaN(parsed.getTime())) newDate = parsed;
+			}
+		}
+		if (!newDate || isNaN(newDate.getTime())) return false;
+
+		dispDate.setTime(getFixTime(newDate.getTime()));
+		dispDate.setDate(1);
+		pickDate.setTime(dispDate.getTime());
+		gridAni = 'zoom';
+		dateToHighlight = pickDate.getTime();
+		updPicker();
+		return true;
 	};
 	dp.setWidth=function(w){
 		w=HijriDate.int(w,width);
