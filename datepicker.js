@@ -331,10 +331,11 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         });
         gridsElm.appendChild(row);
         // Decade navigation
-        let navRow = createElm('div','w3-cell-row');
-        let prev = createElm('button','w3-cell w3-btn','«');
-        let up = createElm('button','w3-cell w3-btn','⬆');
-        let next = createElm('button','w3-cell w3-btn','»');
+        let navRow = createElm('div','w3-cell-row w3-light-grey');
+        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
+        let up = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','⬆');
+        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
+		prev.style.minWidth = next.style.minWidth = up.style.minWidth = '33%';
         prev.onclick = () => showPicker('year', year-10);
         up.onclick = () => showPicker('decade', Math.floor(year/100)*100);
         next.onclick = () => showPicker('year', year+10);
@@ -362,10 +363,11 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         });
         gridsElm.appendChild(row);
         // Century navigation
-        let navRow = createElm('div','w3-cell-row');
-        let prev = createElm('button','w3-cell w3-btn','«');
-        let up = createElm('button','w3-cell w3-btn','⬆');
-        let next = createElm('button','w3-cell w3-btn','»');
+        let navRow = createElm('div','w3-cell-row w3-light-grey');
+        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
+        let up = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','⬆');
+        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
+		prev.style.minWidth = next.style.minWidth = up.style.minWidth = '33%';
         prev.onclick = () => showPicker('decade', century-100);
         up.onclick = () => showPicker('century', Math.floor(century/1000)*1000);
         next.onclick = () => showPicker('decade', century+100);
@@ -393,9 +395,10 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         });
         gridsElm.appendChild(row);
         // Millennium navigation
-        let navRow = createElm('div','w3-cell-row');
-        let prev = createElm('button','w3-cell w3-btn','«');
-        let next = createElm('button','w3-cell w3-btn','»');
+        let navRow = createElm('div','w3-cell-row w3-light-grey');
+        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
+        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
+		prev.style.minWidth = next.style.minWidth =  '50%';
         prev.onclick = () => showPicker('century', mill-1000);
         next.onclick = () => showPicker('century', mill+1000);
         navRow.appendChild(prev); navRow.appendChild(next);
