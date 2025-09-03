@@ -263,7 +263,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		gridAni='zoom';createDates();dpickElm.className=dpickElm.className.replace(' w3-hide','');scrollToFix();return true
 	};
 	dp.today=function(){
-		if(pickerMode!='day'){pickerMode='day';gridAni='zoom';updPicker();return true}
+		if(pickerMode!='day'){pickerMode='day';gridAni='zoom';updPicker();}
 		let oldTm=dispDate.getTime();
 		dispDate.setTime(getCurTime());
 		dispDate.setDate(1);
@@ -344,14 +344,19 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         gridsElm.appendChild(row);
         // Decade navigation
         let navRow = createElm('div','w3-cell-row w3-light-grey');
-        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
         let up = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','⬆');
-        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
-		prev.style.minWidth = next.style.minWidth = up.style.minWidth = '33%';
+		let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M10 7L7 13L10 19L12 19L9 13L12 7Z"/></svg>');
+		let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M7 7L10 13L7 19L9 19L12 13L9 7Z"/></svg>');
+		let cDay = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getVal('todayBtn'));
+		navRow.style.cssText='margin-top:5px;';
+		prev.style.minWidth = next.style.minWidth = up.style.minWidth =  cDay.style.minWidth = '25%';
+		navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next); navRow.appendChild(cDay);
+		
+		cDay.onclick = () => {dp.today()};
         prev.onclick = () => showPicker('year', year-10);
         up.onclick = () => showPicker('decade', Math.floor(year/100)*100);
         next.onclick = () => showPicker('year', year+10);
-        navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next);
+
         gridsElm.appendChild(navRow);
         yearValElm.innerHTML = Datepicker.getDigit(year + ' - ' + (year+9));
         monthValElm.innerHTML = '';
@@ -376,14 +381,18 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         gridsElm.appendChild(row);
         // Century navigation
         let navRow = createElm('div','w3-cell-row w3-light-grey');
-        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
         let up = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','⬆');
-        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
-		prev.style.minWidth = next.style.minWidth = up.style.minWidth = '33%';
+		let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M10 7L7 13L10 19L12 19L9 13L12 7Z"/></svg>');
+		let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M7 7L10 13L7 19L9 19L12 13L9 7Z"/></svg>');
+		let cDay = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getVal('todayBtn'));
+		navRow.style.cssText='margin-top:5px;';
+		prev.style.minWidth = next.style.minWidth = up.style.minWidth =  cDay.style.minWidth = '25%';
+		navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next); navRow.appendChild(cDay);
+		
+		cDay.onclick = () => {dp.today()};
         prev.onclick = () => showPicker('decade', century-100);
         up.onclick = () => showPicker('century', Math.floor(century/1000)*1000);
         next.onclick = () => showPicker('decade', century+100);
-        navRow.appendChild(prev); navRow.appendChild(up); navRow.appendChild(next);
         gridsElm.appendChild(navRow);
         yearValElm.innerHTML = Datepicker.getDigit(century + ' - ' + (century+99));
         monthValElm.innerHTML = '';
@@ -408,12 +417,16 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
         gridsElm.appendChild(row);
         // Millennium navigation
         let navRow = createElm('div','w3-cell-row w3-light-grey');
-        let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '»':'«');
-        let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom',isRTL? '«':'»');
-		prev.style.minWidth = next.style.minWidth =  '50%';
+		let prev = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M10 7L7 13L10 19L12 19L9 13L12 7Z"/></svg>');
+		let next = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom','<svg width="18" height="19"><path d="M7 7L10 13L7 19L9 19L12 13L9 7Z"/></svg>');
+		let cDay = createElm('button','w3-cell w3-btn w3-center w3-transparent w3-animate-zoom', Datepicker.getVal('todayBtn'));
+		navRow.style.cssText='margin-top:5px;';
+		prev.style.minWidth = next.style.minWidth = cDay.style.minWidth = '33%';
+		navRow.appendChild(prev); navRow.appendChild(next); navRow.appendChild(cDay);
+		
+		cDay.onclick = () => {dp.today()};
         prev.onclick = () => showPicker('century', mill-1000);
         next.onclick = () => showPicker('century', mill+1000);
-        navRow.appendChild(prev); navRow.appendChild(next);
         gridsElm.appendChild(navRow);
         yearValElm.innerHTML = Datepicker.getDigit(mill + ' - ' + (mill+999));
         monthValElm.innerHTML = '';
@@ -629,6 +642,7 @@ Object.defineProperty(Datepicker,'lang',{value:'en',writable:true});
 Object.defineProperty(Datepicker,'getVal',{value:function(key){return Datepicker.language[Datepicker.lang][key]}});
 Datepicker.language={en:{
 	isRTL:false,
+	todayBtn:'Today',
 	eraSuffix:["AD","BC"],
 	hEraSuffix:["H","BH"],
 	monthNames:["January","February","March","April","May","June","July","August","September","October","November","December"],
@@ -637,6 +651,7 @@ Datepicker.language={en:{
 }};
 Datepicker.language['id']={
 	isRTL:false,
+	todayBtn:'Hari ini',
 	eraSuffix:["M","SM"],
 	hEraSuffix:["H","SH"],
 	monthNames:["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"],
@@ -646,10 +661,12 @@ Datepicker.language['id']={
 };
 Datepicker.language['ar']={
 	isRTL:true,
+	todayBtn:'اليوم',
 	digit:["٠","١","٢","٣","٤", "٥","٦","٧","٨","٩"],
 	eraSuffix:["ميلادي","قبل الميلاد"],
 	hEraSuffix:["هجرة","قبل الهجرة"],
 	monthNames:["يَنايِر","فِبرايِر","مارِس","أبريل","مايو","يونيو","يوليو","أغُسطُس","سِبْتَمْبِر","أکْتوبَر","نوفَمْبِر","ديسَمْبِر"],
 	weekdayNames:["الأحَد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],
+	weekdayShortNames:["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],
 	hMonthNames:["المُحَرَّم","صَفَر ","رَبيع الاوَّل","رَبيع الآخِر","جُمادى الأولى","جُمادى الآخِرة","رَجَب","شَعبان","رَمَضان","شَوّال","ذو القَعدة","ذو الحِجّة"]
 };
