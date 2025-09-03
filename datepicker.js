@@ -263,8 +263,10 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		gridAni='zoom';createDates();dpickElm.className=dpickElm.className.replace(' w3-hide','');scrollToFix();return true
 	};
 	dp.today=function(){
+		if(pickerMode!='day'){pickerMode='day';gridAni='zoom';updPicker();return true}
 		let oldTm=dispDate.getTime();
-		dispDate.setTime(getCurTime());dispDate.setDate(1);
+		dispDate.setTime(getCurTime());
+		dispDate.setDate(1);
 		if(dispDate.getTime()!=oldTm){gridAni='zoom';updPicker();return true}
 		return false
 	};
@@ -286,6 +288,16 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		if(!isNaN(year))dispDate.setFullYear(year);
 		if(!isNaN(month))dispDate.setMonth(month)
 	}
+	// Set picker mode
+	dp.setPickerMode = function(mode) {
+		const allowedModes = ['day', 'month', 'year', 'decade', 'century'];
+		if (allowedModes.includes(mode)) {
+			pickerMode = mode;
+			updPicker();
+			return true;
+		}
+		return false;
+	};
 
 	// --- Helper for range generation ---
     function range(start, end) {
