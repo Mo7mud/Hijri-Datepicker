@@ -20,7 +20,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 
 	// Picker mode: 'day', 'month', 'year', 'decade', 'century'
     let pickerMode = 'day';
-	let dateToHighlight = 0;
+	let dayToHighlight = 0;
 
 	const MIN_WIDTH=320,MAX_WIDTH=600;
 	let	dp=typeof this=='object'?this:window,gdate=new Date(),hdate=new HijriDate(),pgdate=new Date(),phdate=new HijriDate(),dispDate,pickDate,
@@ -119,8 +119,8 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 				ttc=dispDate.getTime()+(pdate-1)*864e5;
 			grid.setAttribute('val',pdate);
 			row.appendChild(grid);ttc=dispDate.getTime()+(pdate-1)*864e5;
-			console.log(dateToHighlight,ttc,getCurTime());
-			if(getCurTime()==ttc||ttc==26586e6||ttc==dateToHighlight)grid.className+=' w3-'+theme;
+			if(getCurTime()==ttc||ttc==26586e6) grid.className+=' w3-'+theme;
+			else if(ttc==dayToHighlight) grid.className+=' w3-dark-grey';
 			else{
 				if(i%7==isFri)grid.className+=' w3-text-teal';
 				else if(i%7==isSun)grid.className+=' w3-text-red'
@@ -159,7 +159,7 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 		let el=ev.target||ev.srcElement;
 		pickDate.setTime(dispDate.getTime());
 		pickDate.setDate(el.getAttribute('val'));
-		dateToHighlight = pickDate.getTime();
+		dayToHighlight = pickDate.getTime();
 		getOppsPDate().setTime(pickDate.getTime());
 		hideMe();
 		if(pickDate.getTime()==26586e6){
@@ -284,12 +284,13 @@ function Datepicker(isHijr,year,month,firstDay,lang,theme,width){
 			}
 		}
 		if (!newDate || isNaN(newDate.getTime())) return false;
-
 		dispDate.setTime(getFixTime(newDate.getTime()));
+		dayToHighlight = dispDate.getTime();//+1000*60*60*24;
+		console.log(newDate, dayToHighlight, dispDate.getTime(), newDate.getTime());
+
 		dispDate.setDate(1);
 		pickDate.setTime(dispDate.getTime());
 		gridAni = 'zoom';
-		dateToHighlight = pickDate.getTime();
 		updPicker();
 		return true;
 	};
